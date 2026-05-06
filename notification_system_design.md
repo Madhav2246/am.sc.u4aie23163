@@ -401,3 +401,144 @@ Frequently accessed notifications can be cached using Redis.
 ## 3. Archiving
 
 Old notifications can be archived periodically to reduce active table size.
+
+
+
+# Stage 4
+
+# Performance Improvement Strategies
+
+## Problem Statement
+
+Notifications are fetched every time a student opens the application.
+
+As the number of students increases, the database receives a very large number of repeated requests.
+
+This causes:
+
+- high database load
+- slower API response
+- increased server resource usage
+- poor user experience
+
+---
+
+# Proposed Solutions
+
+## 1. Redis Caching
+
+Frequently accessed notifications can be stored in Redis cache.
+
+Instead of querying the database repeatedly:
+
+- first check cache
+- if data exists, return cached data
+- otherwise fetch from DB and store in cache
+
+### Benefits
+
+- faster response time
+- reduced DB load
+- improved scalability
+
+### Tradeoff
+
+- additional memory usage
+- cache invalidation complexity
+
+---
+
+# 2. Pagination
+
+Notifications should be fetched page-by-page.
+
+Example:
+
+```http
+GET /notifications?page=1&limit=20
+```
+
+### Benefits
+
+- reduced payload size
+- faster API response
+- reduced frontend rendering load
+
+### Tradeoff
+
+- requires additional pagination logic
+
+---
+
+# 3. Lazy Loading
+
+Load notifications only when required instead of loading everything initially.
+
+### Benefits
+
+- improved frontend performance
+- reduced API calls
+
+### Tradeoff
+
+- slightly more frontend complexity
+
+---
+
+# 4. Database Indexing
+
+Indexes should be created on:
+
+- student_id
+- is_read
+- created_at
+
+### Benefits
+
+- faster filtering
+- faster sorting
+
+### Tradeoff
+
+- slower insert/update operations
+
+---
+
+# 5. Archiving Old Notifications
+
+Old notifications can be moved to archive tables periodically.
+
+### Benefits
+
+- smaller active database size
+- faster query execution
+
+### Tradeoff
+
+- archive retrieval becomes separate process
+
+---
+
+# 6. Real-Time Push Notifications
+
+Use WebSockets instead of repeated polling.
+
+### Benefits
+
+- instant updates
+- reduced repeated API calls
+
+### Tradeoff
+
+- persistent socket connection management required
+
+---
+
+# Recommended Final Architecture
+
+1. PostgreSQL for persistent storage
+2. Redis for caching
+3. WebSockets for real-time updates
+4. Pagination for scalable fetching
+5. Indexed database queries
+6. Archive strategy for old data

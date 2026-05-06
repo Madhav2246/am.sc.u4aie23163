@@ -1,17 +1,25 @@
 require("dotenv").config();
-const express=require("express");
-const Log=require("../logging_middleware/logger");
-const app=express();
-app.get("/",async(req,res) =>{
-    console.log(process.env.ACCESS_TOKEN);
-    await Log(
-        "backend",
-        "info",
-        "route",
-        "Home route accessed"
-    );
-    res.send("Backend Running");
+
+const express = require("express");
+
+const app = express();
+
+app.use(express.json());
+
+
+// IMPORT ROUTES
+const notificationRoutes = require("./routes/notificationRoutes");
+
+
+// USE ROUTES
+app.use("/notifications", notificationRoutes);
+
+
+app.get("/", (req, res) => {
+    res.send("Notification Backend Running");
 });
-app.listen(3000,()=>{
+
+
+app.listen(3000, () => {
     console.log("Server Started");
 });

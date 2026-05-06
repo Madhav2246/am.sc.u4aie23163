@@ -542,3 +542,157 @@ Use WebSockets instead of repeated polling.
 4. Pagination for scalable fetching
 5. Indexed database queries
 6. Archive strategy for old data
+
+
+
+
+# Stage 5
+
+# Reliable Notification Architecture
+
+## Problem Statement
+
+Multiple university systems generate notifications simultaneously.
+
+Examples:
+
+- placement portal
+- examination portal
+- fee management system
+- academic management system
+
+During peak usage, thousands of notifications may arrive at the same time.
+
+The system must ensure:
+
+- no notification loss
+- high reliability
+- fault tolerance
+- scalability
+
+---
+
+# Proposed Architecture
+
+The system will use:
+
+- Message Queue
+- Notification Service
+- Retry Mechanism
+- Dead Letter Queue
+- Real-Time WebSocket Delivery
+
+---
+
+# Architecture Flow
+
+```text
+University Systems
+        ↓
+ Message Queue (Kafka / RabbitMQ)
+        ↓
+ Notification Processing Service
+        ↓
+ PostgreSQL Database
+        ↓
+ WebSocket Server
+        ↓
+ Student Frontend
+```
+
+---
+
+# Why Message Queues Are Important
+
+Message queues help handle large traffic safely.
+
+Instead of directly writing all notifications to DB:
+
+- notifications enter queue first
+- queue processes messages gradually
+- prevents server overload
+
+---
+
+# Benefits Of Message Queue
+
+## 1. Reliability
+
+Notifications are stored temporarily in queue even if server crashes.
+
+---
+
+## 2. Scalability
+
+Multiple worker services can process notifications in parallel.
+
+---
+
+## 3. Fault Tolerance
+
+If one service fails, messages remain in queue safely.
+
+---
+
+## 4. Traffic Management
+
+Queues smooth sudden traffic spikes.
+
+---
+
+# Retry Mechanism
+
+If notification processing fails:
+
+1. retry automatically
+2. retry after delay
+3. limit retry count
+
+This prevents temporary failures from losing notifications.
+
+---
+
+# Dead Letter Queue (DLQ)
+
+Notifications that repeatedly fail are moved to a Dead Letter Queue.
+
+This allows:
+
+- failure analysis
+- manual inspection
+- debugging invalid messages
+
+---
+
+# Real-Time Delivery
+
+After processing:
+
+- notification stored in PostgreSQL
+- pushed to frontend using WebSockets
+
+This enables instant notification updates.
+
+---
+
+# Recommended Technologies
+
+| Component | Technology |
+|---|---|
+| Database | PostgreSQL |
+| Cache | Redis |
+| Queue | RabbitMQ / Kafka |
+| Backend | Node.js + Express |
+| Real-Time Communication | WebSockets |
+| Frontend | React |
+
+---
+
+# Final Advantages
+
+- highly scalable
+- reliable delivery
+- fault tolerant
+- real-time updates
+- reduced server overload
+- efficient traffic handling

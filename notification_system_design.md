@@ -284,3 +284,120 @@ AND is_read = FALSE;
 SELECT * FROM notifications
 WHERE notification_type = 'Placement';
 ```
+
+
+
+# Stage 3
+
+# Query Optimization And Indexing
+
+## Existing Query
+
+```sql
+SELECT * FROM notifications
+WHERE studentID = 1042
+AND isRead = false
+ORDER BY createdAt ASC;
+```
+
+---
+
+# Is The Query Accurate?
+
+Yes, the query is logically correct because it retrieves unread notifications of a student sorted by creation time.
+
+---
+
+# Why Is The Query Slow?
+
+The query becomes slow because the notifications table contains millions of records.
+
+The database must:
+
+- scan many rows
+- filter unread notifications
+- sort results by createdAt
+
+Without proper indexing, this causes high query execution time.
+
+---
+
+# Recommended Optimization
+
+A composite index should be created on:
+
+- studentID
+- isRead
+- createdAt
+
+---
+
+# Optimized Index
+
+```sql
+CREATE INDEX idx_notifications_student_read_created
+ON notifications(student_id, is_read, created_at);
+```
+
+This significantly improves filtering and sorting performance.
+
+---
+
+# Why Not Add Indexes On Every Column?
+
+Adding indexes on every column is not recommended because:
+
+- indexes consume extra storage
+- inserts become slower
+- updates become slower
+- unnecessary indexes reduce overall DB performance
+
+Indexes should only be created for frequently searched or sorted columns.
+
+---
+
+# Query To Fetch Placement Notifications In Last 7 Days
+
+```sql
+SELECT *
+FROM notifications
+WHERE notification_type = 'Placement'
+AND created_at >= NOW() - INTERVAL '7 days';
+```
+
+---
+
+# Computational Cost
+
+Without indexing:
+- Full table scan occurs
+- Time complexity becomes very high
+
+With proper indexing:
+- Query execution becomes significantly faster
+- Reduced disk access
+- Better scalability for large datasets
+
+---
+
+# Additional Improvements
+
+## 1. Pagination
+
+Instead of loading all notifications:
+
+```http
+GET /notifications?page=1&limit=20
+```
+
+---
+
+## 2. Caching
+
+Frequently accessed notifications can be cached using Redis.
+
+---
+
+## 3. Archiving
+
+Old notifications can be archived periodically to reduce active table size.
